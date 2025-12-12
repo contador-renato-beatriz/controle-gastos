@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinControl - Controle Financeiro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 12px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        /* Cabeçalho Mobile First */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            color: white;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .logo-text p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Navegação do Mês Mobile */
+        .month-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px;
+            border-radius: 50px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+
+        .current-month {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+            padding: 0 10px;
+        }
+
+        /* Cards Gerais Mobile */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:active {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* Card 1: Meta do Mês Mobile */
+        .meta-stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 480px) {
+            .meta-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .meta-value {
+            color: var(--primary);
+        }
+
+        .gasto-value {
+            color: var(--danger);
+        }
+
+        .disponivel-value {
+            color: var(--success);
+        }
+
+        .progress-container {
+            background: var(--gray-light);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        /* Card 2: Fatura do Cartão Mobile */
+        .fatura-dates {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 400px) {
+            .fatura-dates {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .date-box {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+            border-radius: 10px;
+        }
+
+        .date-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .date-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .fatura-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 400px) {
+            .fatura-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Card 3: Nova Despesa Mobile */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 1.5px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Card 4: Gráfico Mobile */
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        .chart-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.95rem;
+            padding: 0 20px;
+        }
+
+        /* Card 5: Despesas do Mês Mobile */
+        .expenses-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .expenses-list {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .expense-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .expense-item:last-child {
+            border-bottom: none;
+        }
+
+        .expense-info {
+            margin-bottom: 10px;
+        }
+
+        .expense-desc {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .expense-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        .expense-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .expense-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--danger);
+            align-self: flex-end;
+        }
+
+        .expense-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            background: #e8f4ff;
+            color: var(--primary);
+        }
+
+        .edit-btn:active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .delete-btn {
+            background: #ffe8ec;
+            color: var(--danger);
+        }
+
+        .delete-btn:active {
+            background: var(--danger);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: #d1d5db;
+        }
+
+        /* Botões Mobile */
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px; /* Tamanho mínimo para toque */
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: var(--secondary);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--gray-light);
+        }
+
+        .btn-secondary:active {
+            background: var(--gray-light);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:active {
+            background: #e11575;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:active {
+            background: #3ab4d4;
+        }
+
+        /* Modais Mobile */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-start; /* Começa do topo no mobile */
+            padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Histórico no Modal Mobile */
+        .history-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .history-month {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .history-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .history-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        /* Layout Desktop - Apenas para telas maiores */
+        @media (min-width: 768px) {
+            body {
+                padding: 25px;
+            }
+            
+            .app-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 20px;
+            }
+            
+            .app-header {
+                grid-column: 1 / -1;
+                padding: 25px 30px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .logo {
+                margin-bottom: 0;
+            }
+            
+            .logo-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2.5rem;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.8rem;
+            }
+            
+            .month-selector {
+                width: auto;
+                min-width: 300px;
+            }
+            
+            .current-month {
+                font-size: 1.3rem;
+            }
+            
+            .card {
+                margin-bottom: 0;
+            }
+            
+            .meta-card {
+                grid-column: span 4;
+            }
+            
+            .fatura-card {
+                grid-column: span 4;
+            }
+            
+            .form-card {
+                grid-column: span 4;
+            }
+            
+            .chart-card {
+                grid-column: span 8;
+            }
+            
+            .expenses-card {
+                grid-column: span 12;
+            }
+            
+            .expense-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .expense-info {
+                margin-bottom: 0;
+            }
+            
+            .expense-actions {
+                margin-top: 0;
+            }
+            
+            .modal-content {
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+        }
+
+        /* Ajustes para tablets */
+        @media (min-width: 480px) and (max-width: 767px) {
+            .app-header {
+                display: block;
+            }
+            
+            .month-selector {
+                margin-top: 15px;
+            }
+            
+            .fatura-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Melhorias de usabilidade para toque */
+        button, input[type="submit"], input[type="button"] {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        input, select, textarea {
+            font-size: 16px; /* Previne zoom no iOS */
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Container principal - Só aparece no desktop -->
+    <div class="app-container">
+        <!-- Cabeçalho -->
+        <div class="app-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>FinControl</h1>
+                    <p>Controle financeiro simples e eficiente</p>
+                </div>
+            </div>
+            
+            <div class="month-selector">
+                <button id="prevMonth" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+                <div id="currentMonth" class="current-month">Carregando...</div>
+                <button id="nextMonth" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Card 1: Meta do Mês -->
+        <div class="card meta-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-bullseye"></i> Meta do Mês</h2>
+                <button id="setMetaBtn" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i> Alterar
+                </button>
+            </div>
+            
+            <div class="meta-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Meta</div>
+                    <div id="metaValue" class="stat-value meta-value">R$ 0,00</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Gasto</div>
+                    <div id="gastoAtual" class="stat-value gasto-value">R$ 0,00</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Disponível</div>
+                    <div id="disponivel" class="stat-value disponivel-value">R$ 0,00</div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div id="progressText" class="progress-text">0% utilizado</div>
+        </div>
+
+        <!-- Card 2: Fatura do Cartão -->
+        <div class="card fatura-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-credit-card"></i> Fatura do Cartão</h2>
+                <button id="viewHistoryBtn" class="btn btn-secondary">
+                    <i class="fas fa-history"></i> Histórico
+                </button>
+            </div>
+            
+            <div class="fatura-dates">
+                <div class="date-box">
+                    <div class="date-label">Fechamento</div>
+                    <div id="fechamentoDay" class="date-value">5</div>
+                </div>
+                <div class="date-box">
+                    <div class="date-label">Vencimento</div>
+                    <div id="vencimentoDay" class="date-value">10</div>
+                </div>
+            </div>
+            
+            <div class="fatura-actions">
+                <button id="closeInvoiceBtn" class="btn btn-danger">
+                    <i class="fas fa-file-invoice"></i> Fechar Fatura
+                </button>
+                <button id="configBtn" class="btn btn-secondary">
+                    <i class="fas fa-cog"></i> Configurar
+                </button>
+            </div>
+        </div>
+
+        <!-- Card 3: Nova Despesa -->
+        <div class="card form-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-plus-circle"></i> Nova Despesa</h2>
+            </div>
+            
+            <form id="expenseForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="descricao">Descrição *</label>
+                        <input type="text" id="descricao" placeholder="Ex: Supermercado" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="valor">Valor (R$) *</label>
+                        <input type="number" id="valor" placeholder="0,00" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria">Categoria *</label>
+                        <select id="categoria" required>
+                            <option value="">Selecione...</option>
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Moradia">Moradia</option>
+                            <option value="Lazer">Lazer</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Educação">Educação</option>
+                            <option value="Compras">Compras</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="data">Data *</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parcelas">Parcelas</label>
+                        <select id="parcelas">
+                            <option value="1">1x (À vista)</option>
+                            <option value="2">2x</option>
+                            <option value="3">3x</option>
+                            <option value="4">4x</option>
+                            <option value="5">5x</option>
+                            <option value="6">6x</option>
+                            <option value="7">7x</option>
+                            <option value="8">8x</option>
+                            <option value="9">9x</option>
+                            <option value="10">10x</option>
+                            <option value="11">11x</option>
+                            <option value="12">12x</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> Adicionar Despesa
+                </button>
+            </form>
+        </div>
+
+        <!-- Card 4: Distribuição por Categoria -->
+        <div class="card chart-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-chart-pie"></i> Distribuição por Categoria</h2>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="categoriasChart"></canvas>
+                <div id="chartMessage" class="chart-message">
+                    Adicione despesas para ver o gráfico
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 5: Despesas do Mês -->
+        <div class="card expenses-card">
+            <div class="expenses-header">
+                <h2 class="card-title"><i class="fas fa-receipt"></i> Despesas do Mês</h2>
+                <button id="clearBtn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Limpar
+                </button>
+            </div>
+            
+            <div id="expensesList" class="expenses-list">
+                <div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <p>Nenhuma despesa registrada este mês</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configuração -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Configurações</h3>
+                <button id="cancelConfig" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="form-grid" style="grid-template-columns: 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label for="newMeta">Meta Mensal (R$)</label>
+                    <input type="number" id="newMeta" step="0.01" min="0.01" placeholder="1500,00">
+                </div>
+                <div class="form-group">
+                    <label for="newFechamento">Dia de Fechamento</label>
+                    <input type="number" id="newFechamento" min="1" max="31" placeholder="5">
+                </div>
+                <div class="form-group">
+                    <label for="newVencimento">Dia de Vencimento</label>
+                    <input type="number" id="newVencimento" min="1" max="31" placeholder="10">
+                </div>
+            </div>
+            
+            <div class="fatura-actions" style="margin-top: 20px;">
+                <button id="saveConfig" class="btn btn-success">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+                <button id="closeConfig" class="btn btn-secondary">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Histórico -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Histórico de Faturas</h3>
+                <button id="closeHistory" class="close-btn">&times;</button>
+            </div>
+            
+            <div id="historyList" class="history-list"></div>
+            
+            <div id="historySummary" class="history-summary" style="margin-top: 20px;"></div>
+            
+            <div class="fatura-actions" style="margin-top: 20px;">
+                <button id="closeHistoryBtn" class="btn btn-secondary">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mantenho a mesma lógica JavaScript anterior
+        // Apenas ajusto alguns comportamentos para mobile
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detectar se é mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Elementos do DOM
+            const elements = {
+                currentMonth: document.getElementById('currentMonth'),
+                prevMonth: document.getElementById('prevMonth'),
+                nextMonth: document.getElementById('nextMonth'),
+                metaValue: document.getElementById('metaValue'),
+                gastoAtual: document.getElementById('gastoAtual'),
+                disponivel: document.getElementById('disponivel'),
+                progressFill: document.getElementById('progressFill'),
+                progressText: document.getElementById('progressText'),
+                setMetaBtn: document.getElementById('setMetaBtn'),
+                fechamentoDay: document.getElementById('fechamentoDay'),
+                vencimentoDay: document.getElementById('vencimentoDay'),
+                closeInvoiceBtn: document.getElementById('closeInvoiceBtn'),
+                configBtn: document.getElementById('configBtn'),
+                viewHistoryBtn: document.getElementById('viewHistoryBtn'),
+                expenseForm: document.getElementById('expenseForm'),
+                descricao: document.getElementById('descricao'),
+                valor: document.getElementById('valor'),
+                categoria: document.getElementById('categoria'),
+                data: document.getElementById('data'),
+                parcelas: document.getElementById('parcelas'),
+                expensesList: document.getElementById('expensesList'),
+                clearBtn: document.getElementById('clearBtn'),
+                categoriasChart: document.getElementById('categoriasChart'),
+                chartMessage: document.getElementById('chartMessage'),
+                configModal: document.getElementById('configModal'),
+                newMeta: document.getElementById('newMeta'),
+                newFechamento: document.getElementById('newFechamento'),
+                newVencimento: document.getElementById('newVencimento'),
+                cancelConfig: document.getElementById('cancelConfig'),
+                saveConfig: document.getElementById('saveConfig'),
+                closeConfig: document.getElementById('closeConfig'),
+                historyModal: document.getElementById('historyModal'),
+                closeHistory: document.getElementById('closeHistory'),
+                closeHistoryBtn: document.getElementById('closeHistoryBtn'),
+                historyList: document.getElementById('historyList'),
+                historySummary: document.getElementById('historySummary')
+            };
+            
+            // Estado do aplicativo
+            const state = {
+                currentYear: new Date().getFullYear(),
+                currentMonth: new Date().getMonth(),
+                metaMensal: 1500,
+                diaFechamento: 5,
+                diaVencimento: 10,
+                despesas: []
+            };
+            
+            // Funções auxiliares
+            function getNomeMes(mes) {
+                const meses = [
+                    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+                ];
+                return meses[mes];
+            }
+            
+            function isMesFechado(ano, mes) {
+                const historico = JSON.parse(localStorage.getItem('historicoFaturas') || '[]');
+                return historico.some(f => f.mes === mes + 1 && f.ano === ano);
+            }
+            
+            function parseDateLocal(dateStr) {
+                const [year, month, day] = dateStr.split('-').map(Number);
+                return new Date(year, month - 1, day);
+            }
+            
+            function formatDateForInput(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            function formatCurrency(value) {
+                return value.toFixed(2).replace('.', ',');
+            }
+            
+            function formatDate(dateStr) {
+                const date = parseDateLocal(dateStr);
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}`;
+            }
+            
+            // Inicialização
+            function init() {
+                const hoje = new Date();
+                elements.data.value = formatDateForInput(hoje);
+                elements.data.max = formatDateForInput(hoje);
+                
+                loadFromStorage();
+                setupEventListeners();
+                updateUI();
+                
+                // Ajustes específicos para mobile
+                if (isMobile) {
+                    // Focar no campo de descrição quando abrir o formulário
+                    elements.descricao.focus();
+                    
+                    // Ajustar altura do gráfico no mobile
+                    elements.categoriasChart.parentElement.style.height = '220px';
+                }
+            }
+            
+            // Carregar dados
+            function loadFromStorage() {
+                const meta = localStorage.getItem('metaMensal');
+                if (meta) state.metaMensal = parseFloat(meta);
+                
+                const fechamento = localStorage.getItem('diaFechamento');
+                const vencimento = localStorage.getItem('diaVencimento');
+                if (fechamento) state.diaFechamento = parseInt(fechamento);
+                if (vencimento) state.diaVencimento = parseInt(vencimento);
+                
+                const despesas = localStorage.getItem('despesas');
+                if (despesas) {
+                    try {
+                        state.despesas = JSON.parse(despesas);
+                    } catch (e) {
+                        console.error("Erro ao carregar despesas:", e);
+                        state.despesas = [];
+                    }
+                }
+                
+                const savedMonth = localStorage.getItem('currentMonth');
+                const savedYear = localStorage.getItem('currentYear');
+                if (savedMonth) state.currentMonth = parseInt(savedMonth);
+                if (savedYear) state.currentYear = parseInt(savedYear);
+                
+                elements.newMeta.value = state.metaMensal;
+                elements.newFechamento.value = state.diaFechamento;
+                elements.newVencimento.value = state.diaVencimento;
+            }
+            
+            // Salvar dados
+            function saveToStorage() {
+                localStorage.setItem('metaMensal', state.metaMensal.toString());
+                localStorage.setItem('diaFechamento', state.diaFechamento.toString());
+                localStorage.setItem('diaVencimento', state.diaVencimento.toString());
+                localStorage.setItem('despesas', JSON.stringify(state.despesas));
+                localStorage.setItem('currentMonth', state.currentMonth.toString());
+                localStorage.setItem('currentYear', state.currentYear.toString());
+            }
+            
+            // Configurar eventos
+            function setupEventListeners() {
+                // Eventos de toque/click para mobile e desktop
+                elements.prevMonth.addEventListener('click', () => changeMonth(-1));
+                elements.nextMonth.addEventListener('click', () => changeMonth(1));
+                
+                elements.setMetaBtn.addEventListener('click', showConfigModal);
+                elements.configBtn.addEventListener('click', showConfigModal);
+                elements.closeInvoiceBtn.addEventListener('click', fecharFatura);
+                elements.clearBtn.addEventListener('click', limparDespesasMes);
+                elements.viewHistoryBtn.addEventListener('click', mostrarHistoricoModal);
+                
+                elements.expenseForm.addEventListener('submit', salvarDespesa);
+                
+                elements.cancelConfig.addEventListener('click', hideConfigModal);
+                elements.closeConfig.addEventListener('click', hideConfigModal);
+                elements.saveConfig.addEventListener('click', salvarConfiguracoes);
+                
+                elements.closeHistory.addEventListener('click', esconderHistoricoModal);
+                elements.closeHistoryBtn.addEventListener('click', esconderHistoricoModal);
+                
+                // Fechar modais ao clicar fora (melhorado para mobile)
+                elements.configModal.addEventListener('click', function(e) {
+                    if (e.target === this) hideConfigModal();
+                });
+                
+                elements.historyModal.addEventListener('click', function(e) {
+                    if (e.target === this) esconderHistoricoModal();
+                });
+                
+                // Prevenir zoom no campo de data no iOS
+                elements.data.addEventListener('touchstart', function(e) {
+                    e.target.style.fontSize = '16px';
+                });
+            }
+            
+            // Funções principais
+            function updateUI() {
+                updateMonthDisplay();
+                updateMetaDisplay();
+                updateFaturaDisplay();
+                updateDespesasList();
+                criarGraficoCategorias();
+            }
+            
+            function updateMonthDisplay() {
+                elements.currentMonth.textContent = `${getNomeMes(state.currentMonth)} ${state.currentYear}`;
+            }
+            
+            function updateMetaDisplay() {
+                const despesasMes = getDespesasMesAtual();
+                const totalGasto = despesasMes.reduce((total, d) => total + d.valorParcela, 0);
+                const disponivel = Math.max(0, state.metaMensal - totalGasto);
+                const percentual = state.metaMensal > 0 ? (totalGasto / state.metaMensal) * 100 : 0;
+                
+                elements.metaValue.textContent = `R$ ${formatCurrency(state.metaMensal)}`;
+                elements.gastoAtual.textContent = `R$ ${formatCurrency(totalGasto)}`;
+                elements.disponivel.textContent = `R$ ${formatCurrency(disponivel)}`;
+                elements.progressFill.style.width = `${Math.min(percentual, 100)}%`;
+                elements.progressText.textContent = `${percentual.toFixed(1)}% utilizado`;
+            }
+            
+            function updateFaturaDisplay() {
+                elements.fechamentoDay.textContent = state.diaFechamento;
+                elements.vencimentoDay.textContent = state.diaVencimento;
+            }
+            
+            function updateDespesasList() {
+                const despesas = getDespesasMesAtual();
+                const mesFechado = isMesFechado(state.currentYear, state.currentMonth);
+                
+                if (despesas.length === 0) {
+                    elements.expensesList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-receipt"></i>
+                            <p>Nenhuma despesa registrada este mês</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                elements.expensesList.innerHTML = despesas.map(despesa => `
+                    <div class="expense-item">
+                        <div class="expense-info">
+                            <div class="expense-desc">${despesa.descricao}</div>
+                            <div class="expense-details">
+                                <span><i class="fas fa-tag"></i> ${despesa.categoria}</span>
+                                <span><i class="fas fa-calendar"></i> ${formatDate(despesa.data)}</span>
+                                ${despesa.parcelas > 1 ? 
+                                    `<span><i class="fas fa-credit-card"></i> ${despesa.parcelaAtual}/${despesa.parcelas}</span>` : ''
+                                }
+                            </div>
+                        </div>
+                        <div>
+                            <div class="expense-amount">R$ ${formatCurrency(despesa.valorParcela)}</div>
+                            ${!mesFechado ? `
+                            <div class="expense-actions">
+                                <button class="action-btn edit-btn" onclick="editarDespesa(${despesa.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="excluirDespesa(${despesa.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Funções de despesas
+            function salvarDespesa(e) {
+                e.preventDefault();
+                
+                if (!elements.descricao.value.trim() || !elements.valor.value || !elements.categoria.value) {
+                    alert("Preencha todos os campos obrigatórios!");
+                    return;
+                }
+                
+                let dataDespesa = parseDateLocal(elements.data.value);
+                const anoDespesa = dataDespesa.getFullYear();
+                const mesDespesa = dataDespesa.getMonth();
+                
+                let despesaMovida = false;
+                let mesDespesaMovida = null;
+                let anoDespesaMovida = null;
+                
+                if (isMesFechado(anoDespesa, mesDespesa)) {
+                    const resposta = confirm(
+                        `O mês de ${getNomeMes(mesDespesa)}/${anoDespesa} já foi fechado.\n` +
+                        `Deseja lançar esta despesa no próximo mês (${getNomeMes(mesDespesa + 1)}/${mesDespesa === 11 ? anoDespesa + 1 : anoDespesa})?`
+                    );
+                    
+                    if (resposta) {
+                        dataDespesa.setMonth(dataDespesa.getMonth() + 1);
+                        elements.data.value = formatDateForInput(dataDespesa);
+                        
+                        despesaMovida = true;
+                        mesDespesaMovida = dataDespesa.getMonth();
+                        anoDespesaMovida = dataDespesa.getFullYear();
+                        
+                        alert(`Despesa será lançada em ${getNomeMes(mesDespesaMovida)}/${anoDespesaMovida}`);
+                    } else {
+                        return;
+                    }
+                }
+                
+                const despesa = {
+                    id: Date.now(),
+                    descricao: elements.descricao.value.trim(),
+                    valorTotal: parseFloat(elements.valor.value),
+                    valorParcela: parseFloat(elements.valor.value) / parseInt(elements.parcelas.value),
+                    parcelas: parseInt(elements.parcelas.value),
+                    parcelaAtual: 1,
+                    categoria: elements.categoria.value,
+                    data: elements.data.value,
+                    dataRegistro: new Date().toISOString()
+                };
+                
+                state.despesas.push(despesa);
+                
+                if (despesa.parcelas > 1) {
+                    for (let i = 2; i <= despesa.parcelas; i++) {
+                        const dataParcela = parseDateLocal(despesa.data);
+                        dataParcela.setMonth(dataParcela.getMonth() + (i - 1));
+                        
+                        const parcela = {
+                            ...despesa,
+                            id: despesa.id + i,
+                            parcelaAtual: i,
+                            data: formatDateForInput(dataParcela)
+                        };
+                        
+                        state.despesas.push(parcela);
+                    }
+                }
+                
+                saveToStorage();
+                updateUI();
+                
+                elements.expenseForm.reset();
+                elements.data.value = formatDateForInput(new Date());
+                elements.parcelas.value = "1";
+                elements.categoria.value = "";
+                
+                if (despesaMovida) {
+                    const verNoMes = confirm(
+                        `Despesa salva com sucesso para ${getNomeMes(mesDespesaMovida)}/${anoDespesaMovida}!\n\n` +
+                        `Deseja ir para esse mês agora para visualizá-la?`
+                    );
+                    
+                    if (verNoMes) {
+                        state.currentMonth = mesDespesaMovida;
+                        state.currentYear = anoDespesaMovida;
+                        saveToStorage();
+                        updateUI();
+                    } else {
+                        alert("Despesa salva! Você pode visualizá-la navegando para o mês correspondente.");
+                    }
+                } else {
+                    alert("Despesa salva com sucesso!");
+                }
+            }
+            
+            function editarDespesa(id) {
+                const despesa = state.despesas.find(d => d.id === id);
+                if (!despesa) return;
+                
+                elements.descricao.value = despesa.descricao;
+                elements.valor.value = despesa.valorTotal;
+                elements.categoria.value = despesa.categoria;
+                elements.data.value = despesa.data;
+                elements.parcelas.value = despesa.parcelas;
+                
+                excluirDespesa(id, false);
+                elements.descricao.focus();
+            }
+            
+            function excluirDespesa(id, confirmar = true) {
+                if (confirmar && !confirm("Tem certeza que deseja excluir esta despesa?")) {
+                    return;
+                }
+                
+                const despesa = state.despesas.find(d => d.id === id);
+                if (!despesa) return;
+                
+                if (despesa.parcelas > 1) {
+                    state.despesas = state.despesas.filter(d => 
+                        !(d.descricao === despesa.descricao && d.valorTotal === despesa.valorTotal)
+                    );
+                } else {
+                    state.despesas = state.despesas.filter(d => d.id !== id);
+                }
+                
+                saveToStorage();
+                updateUI();
+                
+                if (confirmar) {
+                    alert("Despesa excluída com sucesso!");
+                }
+            }
+            
+            function limparDespesasMes() {
+                if (!confirm("Limpar TODAS as despesas deste mês?\nEsta ação não pode ser desfeita.")) {
+                    return;
+                }
+                
+                state.despesas = state.despesas.filter(d => {
+                    const dataDespesa = parseDateLocal(d.data);
+                    return !(dataDespesa.getMonth() === state.currentMonth &&
+                            dataDespesa.getFullYear() === state.currentYear);
+                });
+                
+                saveToStorage();
+                updateUI();
+                
+                alert("Despesas do mês removidas!");
+            }
+            
+            // Funções do mês
+            function changeMonth(delta) {
+                let novoMes = state.currentMonth + delta;
+                let novoAno = state.currentYear;
+                
+                if (novoMes < 0) {
+                    novoMes = 11;
+                    novoAno--;
+                } else if (novoMes > 11) {
+                    novoMes = 0;
+                    novoAno++;
+                }
+                
+                state.currentMonth = novoMes;
+                state.currentYear = novoAno;
+                
+                saveToStorage();
+                updateUI();
+            }
+            
+            function getDespesasMesAtual() {
+                return state.despesas.filter(d => {
+                    const dataDespesa = parseDateLocal(d.data);
+                    return dataDespesa.getMonth() === state.currentMonth &&
+                           dataDespesa.getFullYear() === state.currentYear;
+                });
+            }
+            
+            // Funções da fatura
+            function fecharFatura() {
+                if (!confirm("Fechar a fatura deste mês?\nAs despesas à vista serão removidas e as parceladas mantidas.")) {
+                    return;
+                }
+                
+                const despesasMes = getDespesasMesAtual();
+                const totalFatura = despesasMes.reduce((total, d) => total + d.valorParcela, 0);
+                
+                const historico = JSON.parse(localStorage.getItem('historicoFaturas') || '[]');
+                historico.push({
+                    mes: state.currentMonth + 1,
+                    ano: state.currentYear,
+                    nomeMes: getNomeMes(state.currentMonth),
+                    valor: totalFatura,
+                    dataFechamento: formatDateForInput(new Date()),
+                    despesas: despesasMes.length
+                });
+                
+                if (historico.length > 12) {
+                    historico.splice(0, historico.length - 12);
+                }
+                
+                localStorage.setItem('historicoFaturas', JSON.stringify(historico));
+                
+                state.despesas = state.despesas.filter(d => {
+                    const dataDespesa = parseDateLocal(d.data);
+                    const mesmoMes = dataDespesa.getMonth() === state.currentMonth;
+                    const mesmoAno = dataDespesa.getFullYear() === state.currentYear;
+                    
+                    if (d.parcelas === 1 && mesmoMes && mesmoAno) {
+                        return false;
+                    }
+                    return true;
+                });
+                
+                saveToStorage();
+                updateUI();
+                
+                alert(`Fatura de ${getNomeMes(state.currentMonth)}/${state.currentYear} fechada!\nValor: R$ ${formatCurrency(totalFatura)}\nDespesas à vista removidas.`);
+            }
+            
+            // Gráfico de categorias
+            function criarGraficoCategorias() {
+                const despesasMes = getDespesasMesAtual();
+                
+                if (despesasMes.length === 0) {
+                    elements.chartMessage.textContent = "Adicione despesas para ver o gráfico";
+                    elements.chartMessage.style.display = "block";
+                    
+                    if (window.graficoCategorias instanceof Chart) {
+                        window.graficoCategorias.destroy();
+                        window.graficoCategorias = null;
+                    }
+                    return;
+                }
+                
+                const categorias = {};
+                despesasMes.forEach(d => {
+                    categorias[d.categoria] = (categorias[d.categoria] || 0) + d.valorParcela;
+                });
+                
+                const labels = Object.keys(categorias);
+                const valores = Object.values(categorias);
+                const total = valores.reduce((a, b) => a + b, 0);
+                
+                elements.chartMessage.textContent = `${despesasMes.length} despesas • Total: R$ ${formatCurrency(total)}`;
+                elements.chartMessage.style.display = "block";
+                
+                const cores = [
+                    '#4361ee', '#3a0ca3', '#4cc9f0', '#f72585', 
+                    '#f8961e', '#7209b7', '#06d6a0', '#ff9e00',
+                    '#118ab2', '#ef476f'
+                ];
+                
+                if (window.graficoCategorias instanceof Chart) {
+                    window.graficoCategorias.destroy();
+                }
+                
+                const ctx = elements.categoriasChart.getContext('2d');
+                window.graficoCategorias = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: valores,
+                            backgroundColor: cores.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: isMobile ? 'bottom' : 'right',
+                                labels: {
+                                    padding: 15,
+                                    font: {
+                                        size: isMobile ? 11 : 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${context.label}: R$ ${formatCurrency(value)} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Funções do histórico
+            function mostrarHistoricoModal() {
+                carregarHistoricoNoModal();
+                elements.historyModal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Previne scroll do body
+            }
+            
+            function esconderHistoricoModal() {
+                elements.historyModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            function carregarHistoricoNoModal() {
+                const historico = JSON.parse(localStorage.getItem('historicoFaturas') || '[]');
+                
+                if (historico.length === 0) {
+                    elements.historyList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-file-invoice"></i>
+                            <p>Nenhuma fatura fechada ainda</p>
+                            <small style="color: var(--gray); font-size: 0.85rem;">As faturas fechadas aparecerão aqui</small>
+                        </div>
+                    `;
+                    elements.historySummary.innerHTML = '';
+                    return;
+                }
+                
+                historico.sort((a, b) => {
+                    if (a.ano !== b.ano) return b.ano - a.ano;
+                    return b.mes - a.mes;
+                });
+                
+                let historicoHTML = '';
+                let totalGeral = 0;
+                let totalDespesas = 0;
+                
+                historico.forEach((fatura) => {
+                    totalGeral += fatura.valor;
+                    totalDespesas += fatura.despesas || 0;
+                    
+                    historicoHTML += `
+                        <div class="history-item">
+                            <div class="history-header">
+                                <span class="history-month">${fatura.nomeMes || getNomeMes(fatura.mes - 1)} ${fatura.ano}</span>
+                                <span class="history-value">R$ ${formatCurrency(fatura.valor)}</span>
+                            </div>
+                            <div class="history-details">
+                                <span><i class="fas fa-receipt"></i> ${fatura.despesas || 0} despesas</span>
+                                <span><i class="fas fa-calendar"></i> ${fatura.dataFechamento || 'Data não registrada'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                elements.historyList.innerHTML = historicoHTML;
+                
+                const mediaMensal = totalGeral / historico.length;
+                const mesesComDados = historico.length;
+                
+                elements.historySummary.innerHTML = `
+                    <div style="border-top: 1px solid var(--gray-light); padding-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-light);">
+                            <span>Período analisado:</span>
+                            <span>${mesesComDados} ${mesesComDados === 1 ? 'mês' : 'meses'}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-light);">
+                            <span>Total de despesas:</span>
+                            <span>${totalDespesas}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-light);">
+                            <span>Total gasto:</span>
+                            <span>R$ ${formatCurrency(totalGeral)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-light);">
+                            <span>Média mensal:</span>
+                            <span>R$ ${formatCurrency(mediaMensal)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 15px 0; font-weight: 700; font-size: 1.1rem;">
+                            <span>Total geral:</span>
+                            <span style="color: var(--primary);">R$ ${formatCurrency(totalGeral)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Configurações
+            function showConfigModal() {
+                elements.newMeta.value = state.metaMensal;
+                elements.newFechamento.value = state.diaFechamento;
+                elements.newVencimento.value = state.diaVencimento;
+                elements.configModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function hideConfigModal() {
+                elements.configModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            function salvarConfiguracoes() {
+                const novaMeta = parseFloat(elements.newMeta.value);
+                const novoFechamento = parseInt(elements.newFechamento.value);
+                const novoVencimento = parseInt(elements.newVencimento.value);
+                
+                if (!novaMeta || novaMeta <= 0) {
+                    alert("Digite uma meta válida!");
+                    return;
+                }
+                
+                if (!novoFechamento || novoFechamento < 1 || novoFechamento > 31) {
+                    alert("Dia de fechamento inválido!");
+                    return;
+                }
+                
+                if (!novoVencimento || novoVencimento < 1 || novoVencimento > 31) {
+                    alert("Dia de vencimento inválido!");
+                    return;
+                }
+                
+                state.metaMensal = novaMeta;
+                state.diaFechamento = novoFechamento;
+                state.diaVencimento = novoVencimento;
+                
+                saveToStorage();
+                hideConfigModal();
+                updateUI();
+                
+                alert("Configurações salvas com sucesso!");
+            }
+            
+            // Iniciar aplicativo
+            init();
+            
+            // Funções globais
+            window.editarDespesa = editarDespesa;
+            window.excluirDespesa = excluirDespesa;
+        });
+    </script>
+</body>
+</html>
